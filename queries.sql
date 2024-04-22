@@ -7,8 +7,8 @@ SELECT CONCAT(employees.first_name, ' ', employees.last_name) AS seller, --use C
 FROM employees 
 JOIN sales ON employees.employee_id = sales.sales_person_id 
 JOIN products ON sales.product_id  = products.product_id
-GROUP BY    employees.first_name, employees.last_name --GROUP BY seller 
-ORDER BY  income DESC; --filtrate income by descending
+GROUP BY employees.first_name, employees.last_name --GROUP BY seller 
+ORDER BY income DESC; --filtrate income by descending
 
 --lowest_average_income
 
@@ -48,21 +48,15 @@ WITH weekly_income AS ( --create cte
             WHEN EXTRACT(DOW FROM sales.sale_date) = 0 THEN 'sunday'
         END AS day_of_week,
         SUM(sales.quantity * products.price) AS income --find income sum
-    FROM 
-        sales 
-    JOIN 
-        employees ON sales.sales_person_id = employees.employee_id 
-    JOIN 
-        products ON sales.product_id = products.product_id
-    GROUP BY 
-        seller, day_of_week
+    FROM sales 
+    JOIN employees ON sales.sales_person_id = employees.employee_id 
+    JOIN products ON sales.product_id = products.product_id
+    GROUP BY seller, day_of_week
 )
-SELECT 
-    seller,
-    day_of_week,
+SELECT seller, 
+    day_of_week, 
     FLOOR(income) AS income --round up to integers
-FROM 
-    weekly_income --using cte
+FROM weekly_income --using cte
 ORDER BY 
     CASE --filtrate by day of the week
         WHEN day_of_week = 'monday' THEN 1
@@ -74,3 +68,65 @@ ORDER BY
         WHEN day_of_week = 'sunday' THEN 7
     END,
     seller;
+
+    --age_groups
+
+SELECT 
+    age_category,--refer to the column that will create in subquery
+    COUNT(*) AS count --count the number of customers
+FROM ( --make age groups in subquery for COUNT
+    SELECT 
+        CASE 
+            WHEN age BETWEEN 16 AND 25 THEN '16-25'
+            WHEN age BETWEEN 26 AND 40 THEN '26-40'
+            ELSE '40+'
+        END AS age_category, --make age_category column
+        age
+    FROM customers
+) AS age_groups
+GROUP BY 
+    age_category
+ORDER BY --prioritize 
+    CASE 
+        WHEN age_category = '16-25' THEN 1
+        WHEN age_category = '26-40' THEN 2
+        ELSE 3
+    END;
+
+--customers_by_month
+
+SELECT 
+    TO_CHAR(sale_date, 'YYYY-MM') AS selling_month, --use TO_CHAR for extract year and month
+    COUNT(DISTINCT customer_id) AS total_customers, --count customers
+    SUM(FLOOR(quantity * price)) AS income --use SUM for find income and FLOOR for round up to integers
+FROM sales
+JOIN products ON sales.product_id = products.product_id
+GROUP BY TO_CHAR(sale_date, 'YYYY-MM')
+ORDER BY TO_CHAR(sale_date, 'YYYY-MM') ASC; --prioritize
+
+--special_offer
+
+SELECT 
+    CONCAT(customers.first_name, ' ', customers.last_name) AS customer, --use CONCAT for connect first and last name
+    first_purchase.sale_date, --use first_purchase from subquery
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller --use CONCAT for connect first and last name
+FROM customers
+JOIN (--find 1st buy
+	SELECT customer_id,
+	MIN(sale_date) AS sale_date --use MIN for find first buy in sale_date
+	from sales
+	JOIN products ON sales.product_id = products.product_id
+	WHERE products.price = 0 --mean buy was in promotional period
+	GROUP BY customer_id) 
+	AS first_purchase --merge customers with new subquery table
+ON customers.customer_id = first_purchase.customer_id
+JOIN sales 
+ON first_purchase.customer_id = sales.customer_id 
+AND first_purchase.sale_date = sales.sale_date --check the date of purchase to make sure there are no duplicates
+JOIN employees 
+ON employees.employee_id = sales.sales_person_id
+GROUP BY customers.customer_id, first_purchase.sale_date, employees.first_name, employees.last_name
+ORDER BY customers.customer_id;
+
+--
+
