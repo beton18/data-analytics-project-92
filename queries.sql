@@ -12,7 +12,7 @@ ORDER BY income DESC; --filtrate income by descending
 
 --lowest_average_income
 
-WITH avg_income AS ( --create cte for real average income for all sellers
+WITH avg_income AS ( --create cte for find real average income for all sellers
     SELECT FLOOR(AVG(sales.quantity * products.price)) AS avg_income --find total average income for all sellers and use FLOOR for round to integers
     FROM sales
     JOIN products ON sales.product_id = products.product_id 
@@ -35,39 +35,29 @@ ORDER BY  average_income ASC;
 
 --day_of_the_week_income
 
-WITH weekly_income AS ( --create cte 
+WITH weekly_income AS ( --create cte for find number of week and day of week etc.
     SELECT 
-        CONCAT(employees.first_name, ' ', employees.last_name) AS seller, --use CONCAT for connect first and last name
-        CASE --retrieve the weekday number
-            WHEN EXTRACT(DOW FROM sales.sale_date) = 1 THEN 'monday' --DOW instead of DAY because DOW use all months, also DAY use only first month 
-            WHEN EXTRACT(DOW FROM sales.sale_date) = 2 THEN 'tuesday'
-            WHEN EXTRACT(DOW FROM sales.sale_date) = 3 THEN 'wednesday'
-            WHEN EXTRACT(DOW FROM sales.sale_date) = 4 THEN 'thursday'
-            WHEN EXTRACT(DOW FROM sales.sale_date) = 5 THEN 'friday'
-            WHEN EXTRACT(DOW FROM sales.sale_date) = 6 THEN 'saturday'
-            WHEN EXTRACT(DOW FROM sales.sale_date) = 0 THEN 'sunday'
-        END AS day_of_week,
-        SUM(sales.quantity * products.price) AS income --find income sum
+        CONCAT(employees.first_name, ' ', employees.last_name) AS seller, --find seller
+        TO_CHAR(sale_date, 'Day') as day_of_week, --find day of week wuth TO_CHAR
+        CASE --by default the sunday number is 0, but me need 7. CASE will solve the problem
+            WHEN EXTRACT(DOW FROM sale_date) = 0 THEN 7
+            ELSE EXTRACT(DOW FROM sale_date)
+        END as number_of_week,
+        SUM(sales.quantity * products.price) AS income --find income
     FROM sales 
-    JOIN employees ON sales.sales_person_id = employees.employee_id 
-    JOIN products ON sales.product_id = products.product_id
-    GROUP BY seller, day_of_week
+    JOIN employees 
+    ON sales.sales_person_id = employees.employee_id 
+    JOIN products 
+    ON sales.product_id = products.product_id
+    GROUP BY seller, day_of_week, sale_date
 )
-SELECT seller, 
+SELECT 
+    seller, 
     day_of_week, 
-    FLOOR(income) AS income --round up to integers
-FROM weekly_income --using cte
-ORDER BY 
-    CASE --filtrate by day of the week
-        WHEN day_of_week = 'monday' THEN 1
-        WHEN day_of_week = 'tuesday' THEN 2
-        WHEN day_of_week = 'wednesday' THEN 3
-        WHEN day_of_week = 'thursday' THEN 4
-        WHEN day_of_week = 'friday' THEN 5
-        WHEN day_of_week = 'saturday' THEN 6
-        WHEN day_of_week = 'sunday' THEN 7
-    END,
-    seller;
+    FLOOR(SUM(income)) AS income --use FLOOR for round up to integers
+FROM weekly_income
+GROUP BY seller, day_of_week, number_of_week 
+ORDER BY number_of_week, seller;
 
     --age_groups
 
