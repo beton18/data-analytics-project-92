@@ -8,7 +8,8 @@ FROM employees
 JOIN sales ON employees.employee_id = sales.sales_person_id 
 JOIN products ON sales.product_id  = products.product_id
 GROUP BY employees.first_name, employees.last_name --GROUP BY seller 
-ORDER BY income DESC; --filtrate income by descending
+ORDER BY income DESC --filtrate income by descending
+LIMIT 10; ----use limit for find only 10 empolyeers
 
 --lowest_average_income
 
