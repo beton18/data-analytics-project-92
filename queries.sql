@@ -54,7 +54,7 @@ WITH weekly_income AS ( --create cte for find number of week and day of week etc
 )
 SELECT 
     seller, 
-    day_of_week, 
+    LOWER (day_of_week), 
     FLOOR(SUM(income)) AS income --use FLOOR for round up to integers
 FROM weekly_income
 GROUP BY seller, day_of_week, number_of_week 
