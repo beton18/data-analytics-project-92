@@ -64,7 +64,7 @@ ORDER BY number_of_week, seller;
 
 SELECT 
     age_category,--refer to the column that will create in subquery
-    COUNT(*) AS count --count the number of customers
+    COUNT(*) AS age_count --count the number of customers
 FROM ( --make age groups in subquery for COUNT
     SELECT 
         CASE 
@@ -89,7 +89,7 @@ ORDER BY --prioritize
 SELECT 
     TO_CHAR(sale_date, 'YYYY-MM') AS selling_month, --use TO_CHAR for extract year and month
     COUNT(DISTINCT customer_id) AS total_customers, --count customers
-    SUM(FLOOR(quantity * price)) AS income --use SUM for find income and FLOOR for round up to integers
+    SUM(TRUNC(quantity * price)) AS income --use SUM for find income and FLOOR for round up to integers
 FROM sales
 JOIN products ON sales.product_id = products.product_id
 GROUP BY TO_CHAR(sale_date, 'YYYY-MM')
