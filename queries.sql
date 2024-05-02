@@ -36,29 +36,15 @@ ORDER BY  average_income ASC;
 
 --day_of_the_week_income
 
-WITH weekly_income AS ( --create cte for find number of week and day of week etc.
-    SELECT 
-        CONCAT(employees.first_name, ' ', employees.last_name) AS seller, --find seller
-        TO_CHAR(sale_date, 'Day') as day_of_week, --find day of week wuth TO_CHAR
-        CASE --by default the sunday number is 0, but me need 7. CASE will solve the problem
-            WHEN EXTRACT(DOW FROM sale_date) = 0 THEN 7
-            ELSE EXTRACT(DOW FROM sale_date)
-        END as number_of_week,
-        SUM(sales.quantity * products.price) AS income --find income
-    FROM sales 
-    JOIN employees 
-    ON sales.sales_person_id = employees.employee_id 
-    JOIN products 
-    ON sales.product_id = products.product_id
-    GROUP BY seller, day_of_week, sale_date
-)
 SELECT 
-    seller, 
-    LOWER (day_of_week), 
-    FLOOR(SUM(income)) AS income --use FLOOR for round up to integers
-FROM weekly_income
-GROUP BY seller, day_of_week, number_of_week 
-ORDER BY number_of_week, seller;
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller, --find seller with CONCAT
+    LOWER(TO_CHAR(sale_date, 'Day')) AS day_of_week, --use the LOWER to lowercase
+    FLOOR(SUM(sales.quantity * products.price)) AS income --use FLOOR for round up to integers
+FROM sales 
+JOIN employees ON sales.sales_person_id = employees.employee_id 
+JOIN products ON sales.product_id = products.product_id
+GROUP BY seller, day_of_week, EXTRACT(ISODOW FROM sale_date) 
+ORDER BY EXTRACT(ISODOW FROM sale_date), seller; --use EXTRACT ISODOW for order by number of week
 
     --age_groups
 
