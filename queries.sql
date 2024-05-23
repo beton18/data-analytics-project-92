@@ -1,4 +1,3 @@
-
 --top_10_total_income
 
 SELECT CONCAT(employees.first_name, ' ', employees.last_name) AS seller, --use CONCAT for connect first and last name
