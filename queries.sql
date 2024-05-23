@@ -23,7 +23,7 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 INNER JOIN products
     ON sales.product_id = products.product_id
-GROUP BY 1
+GROUP BY  CONCAT(employees.first_name, ' ', employees.last_name) 
 HAVING
     FLOOR(AVG(sales.quantity * products.price))
     < (
@@ -31,7 +31,7 @@ HAVING
         FROM sales
         INNER JOIN products ON sales.product_id = products.product_id
     )
-ORDER BY 2 ASC;
+ORDER BY FLOOR(AVG(sales.quantity * products.price)) ASC;
 
 --day_of_the_week_income
 
@@ -41,7 +41,8 @@ SELECT
     --use the LOWER to lowercase
     LOWER(TO_CHAR(sale_date, 'Day')) AS day_of_week,
     --use FLOOR for round up to integers
-    FLOOR(SUM(sales.quantity * products.price)) AS income
+    FLOOR(SUM(sales.quantity * products.price)) AS income,
+    EXTRACT(ISODOW FROM sale_date) AS sale_date1
 FROM sales
 INNER JOIN employees ON sales.sales_person_id = employees.employee_id
 INNER JOIN products ON sales.product_id = products.product_id
@@ -52,25 +53,15 @@ ORDER BY EXTRACT(ISODOW FROM sale_date), seller;
 --age_groups
 
 SELECT
-    CASE --create categorys
-        WHEN age BETWEEN 16 AND 25 THEN '16-25'
-        WHEN age BETWEEN 26 AND 40 THEN '26-40'
-        ELSE '40+'
-    END AS age_category,
-    COUNT(*) AS age_count
+CASE --create categorys
+WHEN age BETWEEN 16 AND 25 THEN '16-25'
+WHEN age BETWEEN 26 AND 40 THEN '26-40'
+ELSE '40+'
+END AS age_category,
+COUNT(*) AS age_count
 FROM customers
-GROUP BY
-    age_category,
-    CASE --use CASE because GROUP BY doenst work with SUM
-        WHEN age BETWEEN 16 AND 25 THEN '1'
-        WHEN age BETWEEN 26 AND 40 THEN '2'
-        ELSE '3'
-    END
-ORDER BY CASE --prioritaze
-    WHEN age BETWEEN 16 AND 25 THEN '1'
-    WHEN age BETWEEN 26 AND 40 THEN '2'
-    ELSE '3'
-END;
+GROUP BY 1
+ORDER BY 1;
 
 --customers_by_month
 
