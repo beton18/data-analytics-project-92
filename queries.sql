@@ -15,24 +15,23 @@ LIMIT 10; --use limit for find only 10 empolyeers
 
 --lowest_average_income
 
-select
-    CONCAT(employees.first_name, ' ', employees.last_name) as seller,
-    FLOOR(AVG(sales.quantity * products.price)) as avg_income
-from sales
-inner join employees
-    on sales.sales_person_id = employees.employee_id
-inner join products
-    on sales.product_id = products.product_id
-group by 1
-having
+SELECT
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
+    FLOOR(AVG(sales.quantity * products.price)) AS avg_income
+FROM sales
+INNER JOIN employees
+    ON sales.sales_person_id = employees.employee_id
+INNER JOIN products
+    ON sales.product_id = products.product_id
+GROUP BY 1
+HAVING
     FLOOR(AVG(sales.quantity * products.price))
     < (
-        select FLOOR(AVG(sales.quantity * products.price)) as avg_income
-        from sales
-        inner join products on sales.product_id = products.product_id
+        SELECT FLOOR(AVG(sales.quantity * products.price)) AS avg_income
+        FROM sales
+        INNER JOIN products ON sales.product_id = products.product_id
     )
-order by 2 asc;
-
+ORDER BY 2 ASC;
 
 --day_of_the_week_income
 
