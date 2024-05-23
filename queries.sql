@@ -23,7 +23,7 @@ INNER JOIN employees
     ON sales.sales_person_id = employees.employee_id
 INNER JOIN products
     ON sales.product_id = products.product_id
-GROUP BY  CONCAT(employees.first_name, ' ', employees.last_name) 
+GROUP BY CONCAT(employees.first_name, ' ', employees.last_name)
 HAVING
     FLOOR(AVG(sales.quantity * products.price))
     < (
@@ -39,42 +39,51 @@ SELECT
     --find seller with CONCAT
     CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
     --use the LOWER to lowercase
-    LOWER(TO_CHAR(sale_date, 'Day')) AS day_of_week,
+    LOWER(TO_CHAR(sales.sale_date, 'Day')) AS day_of_week,
     --use FLOOR for round up to integers
     FLOOR(SUM(sales.quantity * products.price)) AS income,
-    EXTRACT(ISODOW FROM sale_date) AS sale_date1
+    EXTRACT(ISODOW FROM sales.sale_date) AS sale_date1
 FROM sales
 INNER JOIN employees ON sales.sales_person_id = employees.employee_id
 INNER JOIN products ON sales.product_id = products.product_id
-GROUP BY seller, day_of_week, EXTRACT(ISODOW FROM sale_date)
+GROUP BY seller, day_of_week, EXTRACT(ISODOW FROM sales.sale_date)
 --use EXTRACT ISODOW for order by number of week
-ORDER BY EXTRACT(ISODOW FROM sale_date), seller;
+ORDER BY EXTRACT(ISODOW FROM sales.sale_date), seller;
 
 --age_groups
 
 SELECT
-CASE --create categorys
-WHEN age BETWEEN 16 AND 25 THEN '16-25'
-WHEN age BETWEEN 26 AND 40 THEN '26-40'
-ELSE '40+'
-END AS age_category,
-COUNT(*) AS age_count
+    CASE --create categorys
+        WHEN age BETWEEN 16 AND 25 THEN '16-25'
+        WHEN age BETWEEN 26 AND 40 THEN '26-40'
+        ELSE '40+'
+    END AS age_category,
+    COUNT(*) AS age_count
 FROM customers
-GROUP BY 1
-ORDER BY 1;
+GROUP BY
+    CASE
+        WHEN age BETWEEN 16 AND 25 THEN '16-25'
+        WHEN age BETWEEN 26 AND 40 THEN '26-40'
+        ELSE '40+'
+    END
+ORDER BY CASE
+    WHEN age BETWEEN 16 AND 25 THEN '16-25'
+    WHEN age BETWEEN 26 AND 40 THEN '26-40'
+    ELSE '40+'
+END;
 
 --customers_by_month
 
 SELECT
     --use TO_CHAR for extract year and month
-    TO_CHAR(sale_date, 'YYYY-MM') AS selling_month,
-    COUNT(DISTINCT customer_id) AS total_customers, --count customers
+    TO_CHAR(sales.sale_date, 'YYYY-MM') AS selling_month,
+    COUNT(DISTINCT sales.customer_id) AS total_customers, --count customers
     --use SUM for find income and TRUNC for round up to integers
-    SUM(TRUNC(quantity * price)) AS income
+    SUM(TRUNC(sales.quantity * products.price)) AS income
 FROM sales
 INNER JOIN products ON sales.product_id = products.product_id
-GROUP BY TO_CHAR(sale_date, 'YYYY-MM')
-ORDER BY TO_CHAR(sale_date, 'YYYY-MM') ASC; --prioritize
+GROUP BY TO_CHAR(sales.sale_date, 'YYYY-MM')
+ORDER BY TO_CHAR(sales.sale_date, 'YYYY-MM') ASC; --prioritize
 
 --special_offer
 
