@@ -96,11 +96,5 @@ INNER JOIN products ON sales.product_id = products.product_id
 INNER JOIN customers ON sales.customer_id = customers.customer_id
 INNER JOIN employees ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0 --select promotional goods
-GROUP BY
-    customers.customer_id,
-    employees.employee_id,
-    customers.first_name,
-    customers.last_name,
-    employees.first_name,
-    employees.last_name
+GROUP by customers.customer_id, 1, 3
 ORDER BY customers.customer_id;
