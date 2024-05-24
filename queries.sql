@@ -25,12 +25,10 @@ INNER JOIN products
     ON sales.product_id = products.product_id
 GROUP BY CONCAT(employees.first_name, ' ', employees.last_name)
 HAVING
-    FLOOR(AVG(sales.quantity * products.price))
-    < (
+    FLOOR(AVG(sales.quantity * products.price)) < (
         SELECT FLOOR(AVG(sales.quantity * products.price)) AS avg_income
         FROM sales
-        INNER JOIN products ON sales.product_id = products.product_id
-    )
+        INNER JOIN products ON sales.product_id = products.product_id)
 ORDER BY FLOOR(AVG(sales.quantity * products.price)) ASC;
 
 --day_of_the_week_income
@@ -96,5 +94,5 @@ INNER JOIN products ON sales.product_id = products.product_id
 INNER JOIN customers ON sales.customer_id = customers.customer_id
 INNER JOIN employees ON sales.sales_person_id = employees.employee_id
 WHERE products.price = 0 --select promotional goods
-GROUP by customers.customer_id, customer, seller
+GROUP BY customers.customer_id, customer, seller
 ORDER BY customers.customer_id;
