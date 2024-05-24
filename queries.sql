@@ -29,7 +29,7 @@ HAVING
         SELECT FLOOR(AVG(sales.quantity * products.price)) AS avg_income
         FROM sales
         INNER JOIN products ON sales.product_id = products.product_id
-)
+    )
 ORDER BY FLOOR(AVG(sales.quantity * products.price)) ASC;
 
 --day_of_the_week_income
