@@ -9,7 +9,7 @@ SELECT
 FROM employees
 INNER JOIN sales ON employees.employee_id = sales.sales_person_id
 INNER JOIN products ON sales.product_id = products.product_id
-GROUP BY employees.first_name, employees.last_name --GROUP BY seller 
+GROUP BY CONCAT(employees.first_name, ' ', employees.last_name)
 ORDER BY income DESC --filtrate income by descending
 LIMIT 10; --use limit for find only 10 empolyeers
 
