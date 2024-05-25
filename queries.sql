@@ -45,9 +45,8 @@ SELECT
 FROM sales
 INNER JOIN employees ON sales.sales_person_id = employees.employee_id
 INNER JOIN products ON sales.product_id = products.product_id
-GROUP BY seller, day_of_week, EXTRACT(ISODOW FROM sales.sale_date)
---use EXTRACT ISODOW for order by number of week
-ORDER BY EXTRACT(ISODOW FROM sales.sale_date), seller;
+GROUP BY seller, day_of_week, sale_date1
+ORDER BY sale_date1, seller;
 
 --age_groups
 
